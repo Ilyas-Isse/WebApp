@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f4f0">
+  <title>Daybook — a little more done</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --page: #f5f4f0;
+      --paper: #fffefa;
+      --ink: #242722;
+      --muted: #85877f;
+      --line: #e9e8e1;
+      --accent: #527a5d;
+      --accent-soft: #e9f0e8;
+      --danger: #b25448;
+      --shadow: 0 18px 55px rgb(34 38 30 / 7%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --page: #171a17;
+        --paper: #202420;
+        --ink: #eef0e9;
+        --muted: #a0a69c;
+        --line: #343a34;
+        --accent: #a1c4a4;
+        --accent-soft: #303d31;
+        --danger: #e39b8e;
+        --shadow: 0 18px 55px rgb(0 0 0 / 22%);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 72px 22px 48px;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgb(212 222 205 / 35%), transparent 48%),
+        var(--page);
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.5;
+      transition: background-color 220ms ease, color 220ms ease;
+    }
+
+    .app { width: min(100%, 480px); margin: 0 auto; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 34px 3px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--accent);
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .intro { margin: 0 0 25px 3px; }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 550;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(29px, 7vw, 36px);
+      font-weight: 650;
+      letter-spacing: -.055em;
+      line-height: 1.15;
+    }
+
+    .card {
+      overflow: hidden;
+      border: 1px solid rgb(128 132 120 / 12%);
+      border-radius: 19px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .card-top {
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .progress-count { color: var(--ink); font-weight: 600; }
+
+    .progress-track {
+      height: 5px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: var(--line);
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+      transition: width 420ms cubic-bezier(.2, .75, .25, 1);
+    }
+
+    .task-list { margin: 0; padding: 4px 24px; list-style: none; }
+
+    .task {
+      display: flex;
+      min-height: 66px;
+      align-items: center;
+      gap: 13px;
+      border-bottom: 1px solid var(--line);
+      animation: arrive 300ms cubic-bezier(.2, .75, .25, 1) both;
+    }
+
+    .task:last-child { border-bottom: 0; }
+
+    @keyframes arrive {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .check-wrap { position: relative; flex: 0 0 21px; height: 21px; }
+
+    .check {
+      position: absolute;
+      inset: 0;
+      width: 21px;
+      height: 21px;
+      margin: 0;
+      appearance: none;
+      border: 1.5px solid #c8cbc2;
+      border-radius: 7px;
+      background: transparent;
+      cursor: pointer;
+      transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+    }
+
+    .check:hover { border-color: var(--accent); transform: scale(1.06); }
+    .check:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 42%, transparent); outline-offset: 3px; }
+
+    .check::after {
+      position: absolute;
+      top: 3px;
+      left: 6px;
+      width: 5px;
+      height: 9px;
+      border: solid var(--paper);
+      border-width: 0 2px 2px 0;
+      content: "";
+      opacity: 0;
+      transform: rotate(45deg) scale(.5);
+      transition: opacity 160ms ease, transform 200ms cubic-bezier(.2, .8, .25, 1.4);
+    }
+
+    .check:checked { border-color: var(--accent); background: var(--accent); }
+    .check:checked::after { opacity: 1; transform: rotate(45deg) scale(1); }
+    .check:active { transform: scale(.88); }
+
+    .task-label {
+      min-width: 0;
+      flex: 1;
+      overflow-wrap: anywhere;
+      font-size: 15px;
+      transition: color 220ms ease;
+    }
+
+    .task.is-done .task-label { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+
+    .delete {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      flex: 0 0 32px;
+      place-items: center;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      opacity: 0;
+      transition: color 160ms ease, background 160ms ease, opacity 160ms ease, transform 160ms ease;
+    }
+
+    .task:hover .delete, .delete:focus-visible { opacity: 1; }
+    .delete:hover { background: color-mix(in srgb, var(--danger) 11%, transparent); color: var(--danger); transform: scale(1.05); }
+    .delete svg { width: 16px; height: 16px; }
+
+    .empty {
+      padding: 34px 8px 36px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .empty strong { display: block; margin-bottom: 3px; color: var(--ink); font-size: 15px; font-weight: 600; }
+
+    .add-form {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin: 0 24px;
+      padding: 17px 0 19px;
+      border-top: 1px solid var(--line);
+    }
+
+    .add-icon {
+      display: grid;
+      width: 21px;
+      height: 21px;
+      flex: 0 0 21px;
+      place-items: center;
+      border: 1.5px solid #c8cbc2;
+      border-radius: 7px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .add-form input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+    }
+
+    .add-form input::placeholder { color: var(--muted); opacity: .9; }
+
+    .add-form button {
+      padding: 7px 12px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--paper);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      transition: transform 160ms ease, opacity 160ms ease;
+    }
+
+    .add-form button:hover { transform: translateY(-1px); }
+    .add-form button:active { transform: scale(.96); }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 3px 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer-note { display: flex; align-items: center; gap: 6px; }
+    .footer-note svg { width: 14px; height: 14px; color: var(--accent); }
+    .clear-button { padding: 0; border: 0; background: none; color: var(--muted); cursor: pointer; font: inherit; }
+    .clear-button:hover { color: var(--danger); }
+    .clear-button:disabled { visibility: hidden; }
+    .storage-message { min-height: 20px; margin: 9px 3px 0; color: var(--danger); font-size: 12px; }
+
+    @media (max-width: 480px) {
+      body { padding: 44px 16px 32px; }
+      .brand { margin-bottom: 29px; }
+      .card-top { padding-right: 20px; padding-left: 20px; }
+      .task-list { padding-right: 20px; padding-left: 20px; }
+      .add-form { margin-right: 20px; margin-left: 20px; }
+      .delete { opacity: .65; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">✓</span> Daybook</div>
+    <header class="intro">
+      <p class="eyebrow" id="today"></p>
+      <h1>A little more done.</h1>
+    </header>
+
+    <section class="card" aria-label="Today's tasks">
+      <div class="card-top">
+        <div class="progress-row">
+          <span class="progress-count" id="progress-count" aria-live="polite"></span>
+          <span id="progress-label"></span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-label="Tasks completed" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+      <ul class="task-list" id="task-list" aria-label="Task list"></ul>
+      <form class="add-form" id="add-form">
+        <span class="add-icon" aria-hidden="true">+</span>
+        <label for="new-task" class="visually-hidden"></label>
+        <input id="new-task" name="task" maxlength="160" placeholder="Add a task..." autocomplete="off" aria-label="New task">
+        <button type="submit">Add</button>
+      </form>
+    </section>
+
+    <div class="footer">
+      <span class="footer-note">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.5 3.5 5v4.6c0 3.7 2.8 6.4 6.5 7.9 3.7-1.5 6.5-4.2 6.5-7.9V5L10 2.5Z" stroke="currentColor" stroke-width="1.5"/><path d="m7.2 9.8 1.8 1.8 3.8-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Saved on this device
+      </span>
+      <button class="clear-button" id="clear-completed" type="button">Clear completed</button>
+    </div>
+    <p class="storage-message" id="storage-message" role="status" aria-live="polite"></p>
+  </main>
+
+  <style>
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  </style>
+  <script>
+    (() => {
+      const STORAGE_KEY = "daybook-tasks-v1";
+      const starterTasks = [
+        { id: "starter-1", text: "Plan the week ahead", done: true },
+        { id: "starter-2", text: "Reply to the important emails", done: false },
+        { id: "starter-3", text: "Take a proper lunch break", done: false }
+      ];
+      const list = document.querySelector("#task-list");
+      const form = document.querySelector("#add-form");
+      const input = document.querySelector("#new-task");
+      const count = document.querySelector("#progress-count");
+      const label = document.querySelector("#progress-label");
+      const track = document.querySelector("#progress-track");
+      const fill = document.querySelector("#progress-fill");
+      const clearButton = document.querySelector("#clear-completed");
+      const message = document.querySelector("#storage-message");
+      let tasks = loadTasks();
+
+      document.querySelector("#today").textContent = new Intl.DateTimeFormat(undefined, {
+        weekday: "long", month: "long", day: "numeric"
+      }).format(new Date());
+
+      function loadTasks() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved === null) return starterTasks.slice();
+          const parsed = JSON.parse(saved);
+          if (!Array.isArray(parsed) || !parsed.every(task =>
+            task && typeof task.id === "string" && typeof task.text === "string" && typeof task.done === "boolean"
+          )) throw new Error("Saved tasks have an invalid format.");
+          return parsed;
+        } catch (error) {
+          message.textContent = "Your saved list could not be loaded. A fresh list is ready.";
+          return starterTasks.slice();
+        }
+      }
+
+      function persist() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+          message.textContent = "";
+        } catch (error) {
+          message.textContent = "Changes could not be saved in this browser.";
+        }
+      }
+
+      function render() {
+        list.replaceChildren();
+        const doneCount = tasks.filter(task => task.done).length;
+        const percentage = tasks.length ? Math.round(doneCount / tasks.length * 100) : 0;
+        count.textContent = `${doneCount} of ${tasks.length} done`;
+        label.textContent = tasks.length === 0 ? "Start with one small thing" : percentage === 100 ? "All wrapped up" : "You're making progress";
+        fill.style.width = `${percentage}%`;
+        track.setAttribute("aria-valuenow", String(percentage));
+        clearButton.disabled = doneCount === 0;
+
+        if (tasks.length === 0) {
+          const empty = document.createElement("li");
+          empty.className = "empty";
+          empty.innerHTML = "<strong>A fresh page.</strong>Add a task to get started.";
+          list.append(empty);
+          return;
+        }
+
+        tasks.forEach((task, index) => {
+          const item = document.createElement("li");
+          item.className = `task${task.done ? " is-done" : ""}`;
+          item.style.animationDelay = `${Math.min(index * 35, 175)}ms`;
+
+          const checkWrap = document.createElement("span");
+          checkWrap.className = "check-wrap";
+          const checkbox = document.createElement("input");
+          checkbox.className = "check";
+          checkbox.type = "checkbox";
+          checkbox.checked = task.done;
+          checkbox.setAttribute("aria-label", `${task.done ? "Mark incomplete" : "Complete"}: ${task.text}`);
+          checkbox.addEventListener("change", () => {
+            task.done = checkbox.checked;
+            persist();
+            render();
+          });
+          checkWrap.append(checkbox);
+
+          const text = document.createElement("span");
+          text.className = "task-label";
+          text.textContent = task.text;
+
+          const remove = document.createElement("button");
+          remove.className = "delete";
+          remove.type = "button";
+          remove.setAttribute("aria-label", `Delete: ${task.text}`);
+          remove.innerHTML = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.5 6h11M8 6V4.5h4V6m2.5 0-.6 9.2a1 1 0 0 1-1 .9H7.1a1 1 0 0 1-1-.9L5.5 6m2.8 3v4m3.4-4v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          remove.addEventListener("click", () => {
+            tasks = tasks.filter(current => current.id !== task.id);
+            persist();
+            render();
+          });
+
+          item.append(checkWrap, text, remove);
+          list.append(item);
+        });
+      }
+
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        const text = input.value.trim();
+        if (!text) {
+          input.focus();
+          return;
+        }
+        tasks.push({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, text, done: false });
+        persist();
+        render();
+        input.value = "";
+        input.focus();
+      });
+
+      clearButton.addEventListener("click", () => {
+        tasks = tasks.filter(task => !task.done);
+        persist();
+        render();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
